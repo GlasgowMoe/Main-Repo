@@ -1,6 +1,8 @@
 class ftpserver ()
 {
-if $facts['os']['name'] == 'Windows'{
-include ftpserver::install
-  }
+  anchor { 'ftpserver::begin':; }
+  -> class { 'ftpserver::permissions':; }
+  -> class { 'ftpserver::install':; }
+  -> class { 'ftpserver::config':; }
+  -> anchor { 'ftpserver::end':; }
 }
