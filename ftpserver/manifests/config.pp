@@ -1,18 +1,19 @@
 class ftpserver::config (
-  $ftpsitepath = '"IIS:\\Sites\\Automated FTP Site"',
+  $ftpsitepath = 'IIS:\\Sites\\',
   $basicauth   = 'ftpServer.security.authentication.basicAuthentication.enabled',
   $roles       = '"FTP USERS"',
-  $pspath      = '"Automated FTP Site"',
+  $pspath      =  'Automated-FTP-Site',
   $filter      = '/system.ftpServer/security/authorization',
   $filter1     = '/system.ftpServer/security/authorization/*',
 )
 {
 #Enable basic authenctication on the FTP site. XXXXX----XXXXXX--
 exec { 'basic-authentication':
-  command     => "Import-Module WebAdministration; Set-ItemProperty -Path ${ftpsitepath} -Name ${basicauth} -Value True",
+  command     => "Import-Module WebAdministration; Set-ItemProperty -Path ${ftpsitepath}${pspath} -Name ${basicauth} -Value True",
+  onlyif      =>  
   refreshonly => true,
   provider    => powershell,
-  #logoutput   =>  true,
+  logoutput   =>  true,
   timeout     => 300,
 }
 

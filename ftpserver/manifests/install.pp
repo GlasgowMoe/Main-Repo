@@ -1,5 +1,5 @@
 class ftpserver::install (
-  $ftpsitename = '"Automated FTP Site"',
+  $ftpsitename = '"Automated-FTP-Site"',
   $ftprootdir  = 'C:\FTProot',
   $ftpport     = '21'
 ) {
