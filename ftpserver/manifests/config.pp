@@ -1,29 +1,24 @@
 class ftpserver::config (
-  $ftpsitepath = 'IIS:\\Sites\\',
-  $basicauth   = 'ftpServer.security.authentication.basicAuthentication.enabled',
-  $roles       = '"FTP USERS"',
-  $pspath      =  'Automated-FTP-Site',
-  $filter      = '/system.ftpServer/security/authorization',
-  $filter1     = '/system.ftpServer/security/authorization/*',
-)
+) inherits ftpserver::params
 {
-#Enable basic authenctication on the FTP site. XXXXX----XXXXXX--
-exec { 'basic-authentication':
-  command     => "Import-Module WebAdministration; Set-ItemProperty -Path ${ftpsitepath}${pspath} -Name ${basicauth} -Value True",
-  onlyif      =>  
-  refreshonly => true,
-  provider    => powershell,
-  logoutput   =>  true,
-  timeout     => 300,
-}
+#notify { 'config':}
 
-# Add an authorization read rule for FTP Users.
-exec {'group-authorization':
-  command   => "Add-WebConfiguration -Filter ${filter} -Value @{accessType=\"Allow\"; roles=${roles}; permissions=\"Read, Write\"} -PSPath IIS:\\ -Location ${pspath} ",
-  unless    =>"if (@(Get-WebConfiguration ${filter1} -Recurse | where {\$_.roles -match ${roles}}).count -eq 0) {exit 1}",
-  notify    => Exec['basic-authentication'],
-  #logoutput => true,
-  provider  => powershell,
-  timeout   => 300,
+#Add an authorization read rule for FTP Users.
+  exec { 'group-authorization':
+    command   => "Import-Module WebAdministration; Add-WebConfiguration -Filter ${filter} -Value @{accessType=\"Allow\"; roles=\"${customer}\\${roles}\"; permissions=\"Read, Write\"} -PSPath IIS:\\\ -Location ${sitename}",
+    onlyif    =>" if (Get-WebConfiguration '/system.ftpServer/security/authorization/*' -Recurse | where {\$_ -ne \$null}) { exit 1 }",
+    logoutput => true,
+    provider  => powershell,
+    timeout   => 300,
+    }
+
+
+#Enable basic authenctication on the FTP site.
+  exec { 'basic-authentication':
+    command     => "Import-Module WebAdministration; Set-ItemProperty -Path ${ftpsitepath}${sitename} -Name ${basicauth} -Value True",
+    onlyif      =>  "if (Get-ItemProperty -Path ${ftpsitepath}${sitename} -Name ${basicauth} | where {\$_.Value -ne \$false}) { exit 1 }",
+    provider    => powershell,
+    logoutput   =>  true,
+    timeout     => 300,
+    }
   }
-}

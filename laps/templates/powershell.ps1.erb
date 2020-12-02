@@ -1,0 +1,4 @@
+# Import required PowerShell cmdlet.
+# Update AD schema to accomodate the new fields to store password data.
+$credentials = New-Object System.Management.Automation.PSCredential -ArgumentList @('<%= @username %>',(ConvertTo-SecureString -String '<%= @password %>' -AsPlainText -Force))
+Start-Process powershell -ArgumentList  "Import-Module -Name AdmPwd.PS ;Update-AdmPwdADSchema" -Credential ($credentials) 
